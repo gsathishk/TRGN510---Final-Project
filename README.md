@@ -6,11 +6,15 @@ rsync -a -P ~/TRGN510project sganesan@hpc-transfer.usc.edu:~/project/TRGN510proj
 
 ```
 ## 2. Unzip transferred files using gunzip
-###   gunzip *.tar.gz &
+```
+gunzip *.tar.gz &
 
+```
 ## 3. Converted filename.fastq.tar to filename.fastq
-### tar -xf filename.fastq.tar
+```
+tar -xf filename.fastq.tar
 
+```
 ## 4. The previous step was to test the untar conversion. But, to untar mutiple files at the same time:
 ```  
 vim untar.sh
