@@ -1,8 +1,10 @@
 # TRGN510---Final-Project
 
 ## 1. Transfer files from local machine to HPC Server TRGN510 Project Folder
-###   rsync -a -P ~/TRGN510project sganesan@hpc-transfer.usc.edu:~/project/TRGN510project
+```
+rsync -a -P ~/TRGN510project sganesan@hpc-transfer.usc.edu:~/project/TRGN510project
 
+```
 ## 2. Unzip transferred files using gunzip
 ###   gunzip *.tar.gz &
 
