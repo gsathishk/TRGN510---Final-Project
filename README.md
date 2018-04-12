@@ -93,8 +93,71 @@ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_28/GRCh37_m
      Website : https://ccb.jhu.edu/software/tophat/index.shtml
 
 ```
-wget https://ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.tar.gz
+wget https://ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.Linux_x86_64.tar.gz
 
 ```	
+
+## 10. Downloaded Bowtie2
+       Website : https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.4.1
+
+```
+wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.4.1/bowtie2-2.3.4.1-linux-x86_64.zip
+
+```
+
+## 11. Testing TopHat2 and Bowtie2
+       Test data from : https://ccb.jhu.edu/software/tophat/tutorial.shtml
+ 
+```
+wget  https://ccb.jhu.edu/software/tophat/downloads/test_data.tar.gz
+
+```
+       Ran the following command to test:
+
+```
+tophat2 -r 20 test_ref reads_1.fq reads_2.fq
+
+```
+      Shown below is a part of the output:
+
+```
+[2018-04-11 22:34:49] Beginning TopHat run (v2.1.1)
+-----------------------------------------------
+[2018-04-11 22:34:49] Checking for Bowtie
+		  Bowtie version:	 2.3.4.1
+[2018-04-11 22:34:49] Checking for Bowtie index files (genome)..
+	Found both Bowtie1 and Bowtie2 indexes.
+[2018-04-11 22:34:49] Checking for reference FASTA file
+[2018-04-11 22:34:49] Generating SAM header for test_ref
+[2018-04-11 22:34:49] Preparing reads
+	 left reads: min. length=75, max. length=75, 100 kept reads (0 discarded)
+	right reads: min. length=75, max. length=75, 100 kept reads (0 discarded)
+[2018-04-11 22:34:49] Mapping left_kept_reads to genome test_ref with Bowtie2
+[2018-04-11 22:34:49] Mapping left_kept_reads_seg1 to genome test_ref with Bowtie2 (1/3)
+[2018-04-11 22:34:49] Mapping left_kept_reads_seg2 to genome test_ref with Bowtie2 (2/3)
+[2018-04-11 22:34:49] Mapping left_kept_reads_seg3 to genome test_ref with Bowtie2 (3/3)
+[2018-04-11 22:34:49] Mapping right_kept_reads to genome test_ref with Bowtie2
+[2018-04-11 22:34:50] Mapping right_kept_reads_seg1 to genome test_ref with Bowtie2 (1/3)
+……..
+
+[2018-04-11 22:34:51] Mapping right_kept_reads_seg1 to genome segment_juncs with Bowtie2 (1/3)
+[2018-04-11 22:34:51] Mapping right_kept_reads_seg2 to genome segment_juncs with Bowtie2 (2/3)
+[2018-04-11 22:34:51] Mapping right_kept_reads_seg3 to genome segment_juncs with Bowtie2 (3/3)
+[2018-04-11 22:34:52] Joining segment hits
+[2018-04-11 22:34:52] Reporting output tracks
+-----------------------------------------------
+[2018-04-11 22:34:52] A summary of the alignment counts can be found in ./tophat_out/align_summary.txt
+[2018-04-11 22:34:52] Run complete: 00:00:03 elapsed
+
+```
+       It created a tophat_out directory, as expected. An example of the expected results from junctions.bed is shown here:
+
+```
+track name=junctions description="TopHat junctions"
+test_chromosome 179     400     JUNC00000001    37      +       179     400     255,0,0 2       71,50   0,171
+test_chromosome 350     550     JUNC00000002    37      +       350     550     255,0,0 2       50,50   0,150
+
+```
+      The test output confirms TopHat2 and Bowtie2 were installed properly and function as expected
 
  
