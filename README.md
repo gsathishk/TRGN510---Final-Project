@@ -3,7 +3,7 @@
 # RNAseq Analysis of CTC Bone Metastasis Samples
 
 ## Description:
-###   I will be processing RNA-seq data from Brx68 Parentals and Brx68 Bone Metastasis samples using TopHat. Brx68 is an ex vivo cultured circulating tumor cell (CTC) cell line. Previously we had processed the same samples using STAR, so I will be comparing results of TopHAT to STAR. In addition I will also be processing samples Brx50 Parentals and Brx50 Bone Metastasis. I will then compare TopHAT results of  Brx50 and Brx68 analysis to find commonly upregulated genes in bone metastasis.     
+   I will be processing RNA-seq data from Brx68 Parentals and Brx68 Bone Metastasis samples using TopHat. Brx68 is an ex vivo cultured circulating tumor cell (CTC) cell line. Previously we had processed the same samples using STAR, so I will be comparing results of TopHAT to STAR. In addition I will also be processing samples Brx50 Parentals and Brx50 Bone Metastasis. I will then compare TopHAT results of  Brx50 and Brx68 analysis to find commonly upregulated genes in bone metastasis.     
 
 ## 1. Transfer files from local machine to HPC Server TRGN510 Project Folder
 ```
@@ -79,7 +79,7 @@ git push -u origin master
 
 ```
   
-##8. Downloaded GRCh37/hg19 reference genome and annotation from GENCODE
+## 8. Downloaded GRCh37/hg19 reference genome and annotation from GENCODE
      Website: https://www.gencodegenes.org/releases/28lift37.html
 
 ```
@@ -89,7 +89,7 @@ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_28/GRCh37_m
 
 ```
 
-##9. Dowloaded TopHat 2.1.1
+## 9. Dowloaded TopHat 2.1.1
      Website : https://ccb.jhu.edu/software/tophat/index.shtml
 
 ```
