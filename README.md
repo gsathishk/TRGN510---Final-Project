@@ -3,7 +3,7 @@
 # RNAseq Analysis of CTC Bone Metastasis Samples
 
 ## Description:
-   I will be processing RNA-seq data from Brx68 Parentals and Brx68 Bone Metastasis samples using TopHat. Brx68 is an ex vivo cultured circulating tumor cell (CTC) cell line. Previously we had processed the same samples using STAR, so I will be comparing results of TopHAT to STAR. In addition I will also be processing samples Brx50 Parentals and Brx50 Bone Metastasis. I will then compare TopHAT results of  Brx50 and Brx68 analysis to find commonly upregulated genes in bone metastasis.     
+   I will be processing RNA-seq data from Brx68 Parentals and Brx68 Bone Metastasis samples using TopHat. Brx68 is an ex vivo cultured circulating tumor cell (CTC) cell line. Previously we had processed the same samples using STAR, so I will be comparing results of TopHAT to STAR. Outside of the class I will do these processes: In addition I will also be processing samples Brx50 Parentals and Brx50 Bone Metastasis. I will then compare TopHAT results of  Brx50 and Brx68 analysis to find commonly upregulated genes in bone metastasis.     
 
 ## 1. Transfer files from local machine to HPC Server TRGN510 Project Folder
 ```
@@ -160,4 +160,207 @@ test_chromosome 350     550     JUNC00000002    37      +       350     550     
 ```
       The test output confirms TopHat2 and Bowtie2 were installed properly and function as expected
 
- 
+## 12. Trimming fastq files
+       Before using the fastq files for alignment via tophat, I trimmed using Trim Galore:
+       
+       First I downloaded Trim Galore!
+       Website: https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/
+
+```
+wget https://github.com/FelixKrueger/TrimGalore/archive/0.4.5.zip
+
+```
+
+     Then unzipped and installed it.
+   
+     Trim Galore! needs 'cutadapt' to function properly, so I downloaded that next.
+     Website: https://cutadapt.readthedocs.io/en/stable/installation.html#quick-installation
+
+```
+wget https://pypi.python.org/packages/68/73/2ae48245bbf6d84a24bdf29540ed01669f09c5d21c26258f2ce07e13c767/cutadapt-1.16.tar.gz#md5=222d062207e2a3a2a0760caa83bf14ff
+
+```
+    To install cutadapt, I need pip, so i downloaded that next. 
+    
+```
+wget https://bootstrap.pypa.io/get-pip.py
+
+```
+    Next used this command as per installation guide :
+
+```
+python get-pip.py
+```
+    But this gave an error and so I tried this:
+```
+python get-pip.py --user
+```
+    pip was then successfully installed.
+    Next continued with installign cutadapt.
+```
+pip install --user --upgrade cutadapt
+```
+    cutadapt was installed successfully!
+    I moved cutadapt, trimgalore to bin folder
+    Next, ran trimgalore on one file to check, it worked without any errors, so used the following slurm scirpt to batch run trimgalore on all fasta files
+```
+#!/bin/bash
+
+#SBATCH --ntasks=16
+
+#SBATCH --time=18:00:00
+
+#SBATCH --mail-type=ALL
+
+#SBATCH --mail-user=sganesan@usc.edu
+
+cd ~/project/TRGN510project/TRGN510project
+~/project/bin/trim_galore *.fastq
+
+```
+   A portion of output summary for one of the processed files is shown below:
+
+```
+Writing report to '68H.R3.fastq_trimming_report.txt'
+
+SUMMARISING RUN PARAMETERS
+==========================
+Input filename: 68H.R3.fastq
+Trimming mode: single-end
+Trim Galore version: 0.4.4_dev
+Cutadapt version: 1.16
+Quality Phred score cutoff: 20
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'AGATCGGAAGAGC' (Illumina TruSeq, Sanger iPCR; auto-detected)
+Maximum trimming error rate: 0.1 (default)
+Minimum required adapter overlap (stringency): 1 bp
+Minimum required sequence length before a sequence gets removed: 20 bp
+
+Writing final adapter and quality trimmed output to 68H.R3_trimmed.fq
+
+
+  >>> Now performing quality (cutoff 20) and adapter trimming in a single pass for the adapter sequence: 'AGATCGGAAGAGC' from file 68H.R3.fastq <<<
+10000000 sequences processed
+20000000 sequences processed
+30000000 sequences processed
+This is cutadapt 1.16 with Python 2.7.5
+Command line parameters: -f fastq -e 0.1 -q 20 -O 1 -a AGATCGGAAGAGC 68H.R3.fastq
+Running on 1 core
+Trimming 1 adapter with at most 10.0% errors in single-end mode ...
+Finished in 915.04 s (27 us/read; 2.26 M reads/minute).
+
+=== Summary ===
+
+Total reads processed:              34,453,893
+Reads with adapters:                 3,635,993 (10.6%)
+Reads written (passing filters):    34,453,893 (100.0%)
+
+Total basepairs processed: 2,602,788,033 bp
+Quality-trimmed:               6,993,547 bp (0.3%)
+Total written (filtered):  2,591,058,972 bp (99.5%)
+
+=== Adapter 1 ===
+
+Sequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 3635993 times.
+
+No. of allowed errors:
+0-9 bp: 0; 10-13 bp: 1
+
+Bases preceding removed adapters:
+  A: 35.0%
+  C: 27.2%
+  G: 19.3%
+  T: 18.5%
+  none/other: 0.0%
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+1	2971303	8613473.2	0	2971303
+2	377417	2153368.3	0	377417
+3	236432	538342.1	0	236432
+4	36067	134585.5	0	36067
+5	10322	33646.4	0	10322
+
+```
+	 
+## 13. Alignment using TopHat2 and Bowtie2
+       I didn't use the GENCODE annotation and sequence files that I downloaded earlier.
+       Tophat2 provides already annotation and bowtie2 indexed files for GRCh27/hg19 so I downloaded those
+       Website: https://ccb.jhu.edu/software/tophat/igenomes.shtml
+```
+wget  ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/Ensembl/GRCh37/Homo_sapiens_Ensembl_GRCh37.tar.gz
+```
+      Next, I ran tophat on one of my files to check if it works:
+```
+	To do tophat on every trimmed file in the folder:
+	
+	#!/bin/bash
+	
+	#SBATCH --ntasks=24
+	
+	#SBATCH --time=24:00:00
+	
+	#SBATCH --mail-type=ALL
+	
+	#SBATCH --mail-user=sganesan@usc.edu
+	
+	cd ~/project/TRGN510project/TRGN510project/TrimmedFiles
+        ~/project/bin/tophat2 --GTF ~/project/TRGN510project/TRGN510project/TrimmedFiles/genes.gtf --no-novel-juncs genome 68bone-21-1_trimmed.fq
+```
+       When I submitted the job by sbatch, It couldn't complete the alignment even in 5 hours, so I add 'tophat2 -p 8' option to make it faster.
+       Now, the alignment took only around 2 hours.
+       Slurm output is shown below:
+```
+[2018-04-13 16:49:19] Beginning TopHat run (v2.1.1)
+-----------------------------------------------
+[2018-04-13 16:49:19] Checking for Bowtie
+		  Bowtie version:	 2.3.4.1
+[2018-04-13 16:49:20] Checking for Bowtie index files (genome)..
+[2018-04-13 16:49:20] Checking for reference FASTA file
+[2018-04-13 16:49:20] Generating SAM header for genome
+[2018-04-13 16:49:49] Reading known junctions from GTF file
+[2018-04-13 16:50:09] Preparing reads
+	 left reads: min. length=20, max. length=76, 30076813 kept reads (4953 discarded)
+[2018-04-13 16:56:49] Building transcriptome data files ./tophat_out/tmp/genes
+[2018-04-13 16:57:48] Building Bowtie index from genes.fa
+[2018-04-13 17:16:02] Mapping left_kept_reads to transcriptome genes with Bowtie2
+[2018-04-13 17:52:12] Resuming TopHat pipeline with unmapped reads
+[2018-04-13 17:52:13] Mapping left_kept_reads.m2g_um to genome genome with Bowtie2
+[2018-04-13 18:19:38] Mapping left_kept_reads.m2g_um_seg1 to genome genome with Bowtie2 (1/3)
+[2018-04-13 18:21:45] Mapping left_kept_reads.m2g_um_seg2 to genome genome with Bowtie2 (2/3)
+[2018-04-13 18:23:46] Mapping left_kept_reads.m2g_um_seg3 to genome genome with Bowtie2 (3/3)
+[2018-04-13 18:26:04] Retrieving sequences for splices
+[2018-04-13 18:27:11] Indexing splices
+Building a SMALL index
+[2018-04-13 18:27:27] Mapping left_kept_reads.m2g_um_seg1 to genome segment_juncs with Bowtie2 (1/3)
+[2018-04-13 18:27:44] Mapping left_kept_reads.m2g_um_seg2 to genome segment_juncs with Bowtie2 (2/3)
+[2018-04-13 18:28:03] Mapping left_kept_reads.m2g_um_seg3 to genome segment_juncs with Bowtie2 (3/3)
+[2018-04-13 18:28:24] Joining segment hits
+[2018-04-13 18:30:22] Reporting output tracks
+-----------------------------------------------
+[2018-04-13 18:55:21] A summary of the alignment counts can be found in ./tophat_out/align_summary.txt
+[2018-04-13 18:55:21] Run complete: 02:06:01 elapsed
+```
+       Then I modified the script to do the following:
+       a) Use a for loop to process all files ending in .fq
+       b) Include the name of the input file to the tophat output file so I can distinguish output from all these different trimmed .fq files
+       c) use move command to rename accepted_hits.bam to filename.bam
+```
+      	#!/bin/bash
+	
+	#SBATCH --ntasks=24
+	
+	#SBATCH --time=24:00:00
+	
+	#SBATCH --mail-type=ALL
+	
+	#SBATCH --mail-user=sganesan@usc.edu
+	
+	cd ~/project/TRGN510project/TRGN510project/TrimmedFiles
+	
+	for file in *.fq; do
+	    samplename=$(basename $file.fq)
+	    ~/project/bin/tophat2 -p 8 -o $samplename-tophat --GTF ~/project/TRGN510project/TRGN510project/TrimmedFiles/genes.gtf --no-novel-juncs genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam
+	    done
+```   
+       After 24 hours, whatever file was not processed, I will re-run the script on remaining files.   
