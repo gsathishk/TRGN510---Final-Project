@@ -283,7 +283,7 @@ length	count	expect	max.err	error counts
 
 ```
 	 
-## 13. Alignment using TopHat2 and Bowtie2
+## 13. Alignment using TopHat2 and Bowtie2.
        I didn't use the GENCODE annotation and sequence files that I downloaded earlier.
        Tophat2 provides already annotation and bowtie2 indexed files for GRCh27/hg19 so I downloaded those
        Website: https://ccb.jhu.edu/software/tophat/igenomes.shtml
@@ -363,4 +363,57 @@ Building a SMALL index
 	    ~/project/bin/tophat2 -p 8 -o $samplename-tophat --GTF ~/project/TRGN510project/TRGN510project/TrimmedFiles/genes.gtf --no-novel-juncs genome $file; mv $samplename-tophat/accepted_hits.bam $samplename-tophat/$samplename.bam
 	    done
 ```   
-       After 24 hours, whatever file was not processed, I will re-run the script on remaining files.   
+       After 24 hours, remaining files were  processed by re-running the script.
+       All files were successfully processed.
+
+## 14. Analysis using CuffDiff
+       I downloaded CuffDiff to perform differential analysis from mapped reads.
+       Website: http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/
+
+``` 
+wget http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-2.2.1.Linux_x86_64.tar.gz
+
+```
+
+      Then I ran CuffDiff on my unit test data using the following script:
+```
+#!/bin/bash
+
+#SBATCH --ntasks=24
+
+#SBATCH --time=24:00:00
+
+#SBATCH --mail-type=ALL
+
+#SBATCH --mail-user=sganesan@usc.edu
+
+cd ~/project/TRGN510project/TRGN510project/TrimmedFiles/CompletedTophat/
+
+~/project/bin/cuffdiff -o ~/project/TRGN510project/TRGN510project/TrimmedFiles/CompletedTophat/50BoneVsParental_TEST -L 50Bone,50Parental -p 4 --frag-bias-correct ~/project/TRGN510project/TRGN510project/TrimmedFiles/genome.fa --multi-read-correct --library-norm-method quartile ~/project/TRGN510project/TRGN510project/TrimmedFiles/genes.gtf 50Bone 50Parental         
+```
+
+     A sample of output file gene_exp.diff from the test analysis comparing 50Bone and parental is shown here:
+```
+sganesan@hpc-login3:~/project/TRGN510project/TRGN510project/TrimmedFiles/CompletedTophat/50BoneVsParental_TEST/50ParentalVsBone_TEST cat gene_exp.diff | head
+test_id	gene_id	gene	locus	sample_1	sample_2	status	value_1	value_2	log2(fold_change)	test_stat	p_value	q_value	significant
+ENSG00000000003	ENSG00000000003	TSPAN6	X:99883666-99894988	50Bone.bam	50Parental.bam	OK	10.6042	2.07391	-2.35421	-2.06356	0.042	0.994919	no
+ENSG00000000005	ENSG00000000005	TNMD	X:99839798-99854882	50Bone.bam	50Parental.bam	NOTEST	0	0	0	0	1	1	no
+ENSG00000000419	ENSG00000000419	DPM1	20:49505584-49575092	50Bone.bam	50Parental.bam	OK	54.0528	48.7805	-0.148064	-0.0653279	0.9213	0.994919	no
+ENSG00000000457	ENSG00000000457	SCYL3	1:169631244-169863408	50Bone.bam	50Parental.bam	OK	5.9338	12.042	1.02104	0.816778	0.41145	0.994919	no
+ENSG00000000460	ENSG00000000460	C1orf112	1:169631244-169863408	50Bone.bam	50Parental.bam	OK	8.43574	2.41329	-1.80551	-0.732915	0.1979	0.994919	no
+ENSG00000000938	ENSG00000000938	FGR	1:27938574-27961788	50Bone.bam	50Parental.bam	NOTEST	0	0.0431237	inf	0	1	1	no
+ENSG00000000971	ENSG00000000971	CFH	1:196621007-196716634	50Bone.bam	50Parental.bam	NOTEST	0	0.0607381	inf	0	1	1	no
+ENSG00000001036	ENSG00000001036	FUCA2	6:143771943-143832827	50Bone.bam	50Parental.bam	OK	52.3181	25.7441	-1.02307	-0.844985	0.32195	0.994919	no
+ENSG00000001084	ENSG00000001084	GCLC	6:53362138-53481969	50Bone.bam	50Parental.bam	OK	34.3053	27.3201	-0.328469	-0.262155	0.71015	0.994919	no
+```
+ I used rsync to transfer this file to local machine and then imported into R for analysis.
+CuffDiff analysis will be run on Brx68Parental and Bone samples
+
+## 15. Data Manipulation and Visualization using R 
+
+      After transferring data to local machine, I removed those fields with FPKM values of 0 to avoid genes that show 'infinite' as log2fold change value.
+      Then I imported the data into R and performed the following analysis:
+      1. First I created a newdata frame by subsetting only 'gene', 'value_1', 'value-2', 'log2fold change' and 'p-value'.
+         Values 1 and 2 refer to coloumns with FPKM values for bone and parental respectively.
+      2. Next, I created a volcano plot to visualize changes in gene experssion of bone vs parental samples. Log2fold change and p-values are used for plotting the data.
+         
