@@ -417,3 +417,69 @@ CuffDiff analysis will be run on Brx68Parental and Bone samples
          Values 1 and 2 refer to coloumns with FPKM values for bone and parental respectively.
       2. Next, I created a volcano plot to visualize changes in gene experssion of bone vs parental samples. Log2fold change and p-values are used for plotting the data.
          
+```
+getwd()
+setwd('/Users/sathishkumarganesan/TRGN510project/68BoneVsParentals')
+#Extract Table from CuffDiff analysis into R.
+Brx68CuffDiff <- read.table("gene_exp.diff", header = TRUE)
+#Making a new table with 'gene', 'value_1', 'value-2', 'log2fold change' and 'p-value'.
+GeneExpression <- Brx68CuffDiff[c(1:63657),c(3,8:10,12)]
+#Removing genes with FPKM values less than 0.9 in Brx68 parental
+GeneExpression_Value1 <- subset(GeneExpression, value_1 > 0.9)
+# From that subset, removing genes with FPKM values less than 0.9 in Brx68 Bone 
+Brx68ParentalvsBone <- subset(GeneExpression_Value1, value_2 > 0.9)
+## To make Volcano Plot 
+with(Brx68ParentalvsBone, plot(log2.fold_change., -log10(p_value), pch=20, col="grey", main="Brx68 Parental vs Bone", xlim=c(-7,7), ylim=c(0,4)))
+#To colour genes with pvalue less than 0.05 and log2fold change in expression more than 1.5
+with(subset(Brx68ParentalvsBone, p_value<.05 & abs(log2.fold_change.)>1.5), points(log2.fold_change., -log10(p_value), pch=20, col="darkcyan"))
+# To add text to genes that have pvalue less than 0.01 and log2fold change greater than 4.0
+library(calibrate)
+with(subset(Brx68ParentalvsBone, p_value<.01 & abs(log2.fold_change.)>2.5), textxy(log2.fold_change., -log10(p_value), labs=gene, cex=.3))
+```
+## 16. R Shiny and Deployment
+
+      I created a new app.R document with the following code to generate plot of log2Foldchange vs -log10pvalue. 
+      Added a radio button to choose colours for the plot
+      Added option to click on a datapoint which would then retreive all the row data (gene name, FPKM values, log2foldchange, p-value and -log10pvalue)
+```
+library(shiny)
+ParentalvsBoneMets <- read.table("Data.txt", header = TRUE)
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+  titlePanel("Gene Expression Changes in Bone Metastatic CTCs"),
+  # Copy the line below to make a set of radio buttons
+  radioButtons("radio", label = h5("Plot Color"),
+               choices = list("Blue", "Orange", "Black"), 
+               selected = "Blue"),
+  
+ 
+  plotOutput("plot1", click = "plot_click"),
+  verbatimTextOutput("info")
+  
+)
+
+server <- function(input, output) {
+  
+  # You can access the values of the widget (as a vector)
+  # with input$radio, e.g.
+  output$plot1 <- renderPlot({
+    plot(ParentalvsBoneMets$log2.fold_change., ParentalvsBoneMets$log10pvalue, col=input$radio)
+  })
+  
+  output$info <- renderPrint({
+    # With base graphics, need to tell it what the x and y variables are.
+    nearPoints(ParentalvsBoneMets, input$plot_click, xvar = "log2.fold_change.", yvar = "log10pvalue")
+    # nearPoints() also works with hover and dblclick events
+  })
+}
+  
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+     Next, to deploy:
+     Used rsync to copy the app.R and the dataset into server shiny folder to deploy. Verified by checking on the browser.
+
+    Volcano Plot from 15 has been uploaded as image in Github.
+    R shiny deployment has been uploaded as PDF showing the server name and the deployed plot.
